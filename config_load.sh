@@ -24,7 +24,7 @@ else
 fi
 
 # 不应被链接的路径（相对 SRC；路径等于某项、或位于某项目录下都排除）
-EXCLUDE=(".git" ".gitignore" "config_load.sh")
+EXCLUDE=(".git" ".gitignore" "config_load.sh" "pkglist.txt" "foreignpkglist.txt" "install_file" "xlogout")
 
 is_excluded() {
     local rel="$1" pat
