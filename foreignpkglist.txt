@@ -1,0 +1,6 @@
+claude-code
+gtypist
+lx-music-desktop-bin
+qq
+visual-studio-code-bin
+wechat

@@ -1,0 +1,36 @@
+post_install() {
+  _setup_suid
+  _cleanup_makedeps
+}
+
+post_upgrade() {
+  _setup_suid
+  _cleanup_makedeps
+}
+
+_setup_suid() {
+  # ThroneCore 需要 root 权限创建 TUN 接口，预设 SUID 位
+  # 否则程序运行时会尝试 chown/chmod 但普通用户无权执行（错误码 32512）
+  chown root:root /opt/Throne/ThroneCore
+  chmod u+s /opt/Throne/ThroneCore
+}
+
+_cleanup_makedeps() {
+  # 构建 makedepends 列表
+  local makedeps=(cmake git go lld protobuf qt6-tools vulkan-headers)
+  local orphans
+  orphans=$(pacman -Qdtq 2>/dev/null || true)
+  [[ -z "$orphans" ]] && return 0
+
+  local to_remove=()
+  for pkg in "${makedeps[@]}"; do
+    if echo "$orphans" | grep -qx "$pkg"; then
+      to_remove+=("$pkg")
+    fi
+  done
+
+  if [[ ${#to_remove[@]} -gt 0 ]]; then
+    echo "清理构建工具链 (orphan makedepends): ${to_remove[*]}"
+    pacman -Rns --noconfirm "${to_remove[@]}" 2>/dev/null || echo "部分包可能被其他包依赖，跳过删除"
+  fi
+}

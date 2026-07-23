@@ -1,0 +1,140 @@
+// -*- mode: jsonc -*-
+{
+    // "margin-top": 5,
+    // "margin-left": 10,
+    // "margin-right": 10,
+    "layer": "top", // Waybar at top layer
+    // "position": "bottom", // Waybar position (top|bottom|left|right)
+    "height": 0, // Waybar height (to be removed for auto height)
+    // "width": 1280, // Waybar width
+    "spacing": 6, // Gaps between modules (4px)
+    "font-family":"MesloLGS NF",
+    // Choose the order of the modules
+    "modules-left": [
+        "custom/icon",
+        "hyprland/workspaces",
+        "hyprland/window"
+    ],
+    "modules-center": [
+        "clock"
+        
+    ],
+    "modules-right": [
+        // "wireplumber",
+        "wireplumber#sink",     // 扬声器
+        "wireplumber#source",   // 麦克风
+        "network",
+        "bluetooth",
+        "cpu",
+        "memory",
+        "temperature",
+        // "hyprland/language",
+        
+        "tray" ,
+        "custom/power"
+    ],
+    "custom/icon":
+    {
+        "format":"{icon}",
+        "format-icons": [""],
+        "tooltip-format":"Teiminal",
+        "on-click":"alacritty"
+
+    },
+    // Modules configuration
+    "hyprland/workspaces": {
+        "format": "{icon}",
+        "on-click": "activate",
+        "format-icons": {
+            //"active": " "
+        },
+        "sort-by-number": true,
+        "persistent-workspaces":{
+            //  "*": 5 // 5 workspaces by default on every monitor
+            // "HDMI-A-1": 3 // but only three on HDMI-A-1
+        }
+
+    },
+    "hyprland/window": {
+        "separate-outputs":true,
+        "max-length": 50,
+        "format": "   <span style=\"italic\">{}</span>   "
+    },
+
+    "tray": {
+        "icon-size": 21,
+        "spacing": 10
+
+    },
+    "clock": {
+        "timezone": "Asia/Shanghai",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        "format-alt": "{:%Y-%m-%d}"
+    },
+
+    "cpu": {
+        "format": ":{usage}%",
+        "tooltip": false
+    },
+    "memory": {
+        "format": ":{}%"
+    },
+    "temperature": {
+        // "thermal-zone": 2,
+        "hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input",
+        "critical-threshold": 80,
+        // "format-critical": "{temperatureC}°C {icon}",
+        "format": "{icon} {temperatureC}°C",
+        "format-icons": ["", "", ""]
+    },
+    "network": {
+        "format-wifi": "",
+        "format-ethernet": "",
+        "format-disconnected": "", 
+        "tooltip-format": "{essid} {frequency}GHz",
+        // "on-click": "hyprctl dispatch exec 'nm-connection-editor'"
+        
+    },
+    "bluetooth":{
+        "format": "",
+        "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
+        // "on-click":"hyprctl dispatch exec 'blueman-manager'",
+        // "on-click": "bluetoothctl power off || bluetoothctl power on"
+    },
+
+    "wireplumber#sink": {                   //扬声器
+        "format": "{icon} {volume}%",
+        "format-bluetooth": " {volume}%",
+        "format-bluetooth-muted": " ",
+        "format-muted": "",
+
+        "format-icons": {
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": ["", "", ""]
+        },
+        "node-type": "Audio/Sink",          // 控制扬声器，改为 "Audio/Source" 即可管理麦克风
+        "scroll-step": 5,                   // 每次滚动调节 5% 音量
+        "on-click": "pavucontrol",             // 左键点击打开qpwgraph  (PipeWire 图形化路由工具)
+        "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle" // 右键静音
+    },
+
+        "wireplumber#source": {             //麦克风
+        "format": " {volume}%",
+        "format-muted": "",
+
+        "node-type": "Audio/Source", 
+        "scroll-step": 5,
+        "on-click": "qpwgraph",             // 左键点击打开qpwgraph  (PipeWire 图形化路由工具)
+        "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
+    },
+
+    "custom/power": {
+        "format" : " ⏻ ",
+        "on-click":"~/.config/waybar/scripts/power-menu"
+    }
+}

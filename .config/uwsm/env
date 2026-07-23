@@ -1,0 +1,26 @@
+#XDG
+export XDG_SESSION_TYPE=wayland
+
+# #X-Cursor
+# export XCURSOR_THEME=GoogleDot-Blue
+
+
+# toolkit-specific scale
+export XCURSOR_SIZE=24
+export GDK_SCALE=2
+
+# #electron
+export ELECTRON_OZONE_PLATFORM_HINT=wayland
+
+# #NVIDIA
+# export LIBVA_DRIVER_NAME=nvidia
+# export __GLX_VENDOR_LIBRARY_NAME=nvidia
+# export GBM_BACKEND=nvidia-drm
+# #VA-API 硬件视频加速 
+# export NVD_BACKEND=direct
+#
+#fcitx5
+export QT_IM_MODULES="wayland;fcitx"
+export QT_IM_MODULE=fcitx
+export XMODIFIERS=@im=fcitx
+

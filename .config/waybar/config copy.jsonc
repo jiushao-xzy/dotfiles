@@ -1,0 +1,247 @@
+// -*- mode: jsonc -*-
+{
+    "margin-top": 5,
+    "margin-left": 10,
+    "margin-right": 10,
+    "layer": "top", // Waybar at top layer
+    // "position": "bottom", // Waybar position (top|bottom|left|right)
+    "height": 25, // Waybar height (to be removed for auto height)
+    // "width": 1280, // Waybar width
+    "spacing": 4, // Gaps between modules (4px)
+    "font-family":"MesloLGS NF",
+    // Choose the order of the modules
+    "modules-left": [
+        "custom/icon",
+        "hyprland/workspaces",
+        
+        // "sway/mode",
+        // "sway/scratchpad",
+        "custom/media-prev",
+        "custom/media-play-pause",
+        "custom/media-next",
+        "custom/media-info",
+        "hyprland/window"
+    ],
+    "modules-center": [
+        "clock"
+        
+    ],
+    "modules-right": [
+        // "mpd",
+        // "idle_inhibitor",
+        "pulseaudio",
+        "network",
+        "bluetooth",
+        // "power-profiles-daemon",
+        "cpu",
+        "memory",
+        "temperature",
+        // "backlight",
+        // "keyboard-state",
+        // "hyprland/language",
+        // "battery",
+        // "battery#bat2",
+        
+        "tray" ,
+        "custom/power"
+    ],
+    "custom/icon":
+    {
+        "format":"{icon}",
+        "format-icons": [""],
+        "tooltip-format":"Teiminal",
+        "on-click":"hyprctl dispatch exec 'alacritty'"
+
+    },
+    // Modules configuration
+    "hyprland/workspaces": {
+        "format": "{icon}",
+        "on-click": "activate",
+        "format-icons": {
+            // "active": " "
+        },
+        "sort-by-number": true,
+        "persistent-workspaces":{
+            "1":[],
+            "2":[],
+            "3":[],
+            "4":[],
+            "5":[]
+            // "*": 6 // 5 workspaces by default on every monitor
+            // "HDMI-A-1": 3 // but only three on HDMI-A-1
+        }
+         
+    },
+    "keyboard-state": {
+        "numlock": true,
+        "capslock": true,
+        "format": "{icon} {name}",
+        "format-icons": {
+            "locked": "",
+            "unlocked": ""
+        }
+    },
+    "hyprland/window": {
+        "format": "   <span style=\"italic\">{}</span>   "
+    },
+    "sway/scratchpad": {
+        "format": "{icon} {count}",
+        "show-empty": false,
+        "format-icons": ["", ""],
+        "tooltip": true,
+        "tooltip-format": "{app}: {title}"
+    },
+    "mpd": {
+        "format": "{stateIcon} {consumeIcon}{randomIcon}{repeatIcon}{singleIcon}{artist} - {album} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S}) ⸨{songPosition}|{queueLength}⸩ {volume}% ",
+        "format-disconnected": "Disconnected ",
+        "format-stopped": "{consumeIcon}{randomIcon}{repeatIcon}{singleIcon}Stopped ",
+        "unknown-tag": "N/A",
+        "interval": 5,
+        "consume-icons": {
+            "on": " "
+        },
+        "random-icons": {
+            "off": "<span color=\"#f53c3c\"></span> ",
+            "on": " "
+        },
+        "repeat-icons": {
+            "on": " "
+        },
+        "single-icons": {
+            "on": "1 "
+        },
+        "state-icons": {
+            "paused": "",
+            "playing": ""
+        },
+        "tooltip-format": "MPD (connected)",
+        "tooltip-format-disconnected": "MPD (disconnected)"
+    },
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "",
+            "deactivated": ""
+        }
+    },
+    "tray": {
+        "icon-size": 21,
+        "spacing": 10
+
+    },
+    "clock": {
+        "timezone": "Asia/Shanghai",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        "format-alt": "{:%Y-%m-%d}"
+    },
+    "cpu": {
+        "format": ":{usage}%",
+        "tooltip": false
+    },
+    "memory": {
+        "format": ":{}%"
+    },
+    "temperature": {
+        // "thermal-zone": 2,
+        "hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input",
+        "critical-threshold": 80,
+        // "format-critical": "{temperatureC}°C {icon}",
+        "format": "{icon} {temperatureC}°C",
+        "format-icons": ["", "", ""]
+    },
+    "backlight": {
+        // "device": "acpi_video1",
+        "format": "{icon}:{percent}%",
+        "format-icons": ["", "", "", "", "", "", "", "", ""]
+    },
+    "battery": {
+        "states": {
+            "good": 95,
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon} {capacity}%",
+        "format-full": "{icon} {capacity}%",
+        "format-charging": " {capacity}%",
+        "format-plugged": " {capacity}%",
+        "format-alt": "{icon} {time}",
+        // "format-good": "", // An empty format will hide the module
+        // "format-full": "",
+        "format-icons": ["", "", "", "", ""]
+    },
+    "battery#bat2": {
+        "bat": "BAT2"
+    },
+    "power-profiles-daemon": {
+      "format": "{icon}",
+      "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+      "tooltip": true,
+      "format-icons": {
+        "default": "",
+        "performance": "",
+        "balanced": "",
+        "power-saver": ""
+      }
+    },
+    "network": {
+        "format-wifi": "",
+        "tooltip-format": "{essid} {frequency}GHz",
+        "format-disconnected": "Disconnected ⚠",
+        "on-click": "hyprctl dispatch exec 'nm-connection-editor'"
+        
+    },
+    "bluetooth":{
+        "format": "",
+        "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
+        "on-click":"hyprctl dispatch exec 'blueman-manager'"
+
+    },
+    "pulseaudio": {
+        "scroll-step": 1, // %, can be a float
+        "format": "{icon} {volume}% {format_source}",
+        "format-bluetooth": " {volume}% {format_source}",
+        "format-bluetooth-muted": " {format_source}",
+        "format-muted": " {format_source}",
+        "format-source": " {volume}% ",
+        "format-source-muted": "",
+        "format-icons": {
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": ["", "", ""]
+        },
+        "on-click": "hyprctl dispatch exec 'pavucontrol'"
+    },
+    "custom/media-prev":{
+        "format":" ⏮ ",
+        "tooltip-format":"Prev",
+        "on-click":"playerctl -p $(playerctl -l) previous"
+    },
+    "custom/media-play-pause":{
+        "exec": "~/.config/waybar/scripts/media-play-pause.sh",
+        "return-type": "json",
+        "restart-interval": 1,
+        "on-click":"playerctl -p $(playerctl -l) play-pause"
+
+    },
+    "custom/media-next":{
+        "format":" ⏭ ",
+        "tooltip-format":"Next",
+        "on-click":"playerctl -p $(playerctl -l) next"
+    },
+   "custom/media-info": {
+        "exec": "~/.config/waybar/scripts/media-info.sh",
+        "return-type": "json",
+        "restart-interval": 1,
+        "on-click": "hyprctl dispatch exec 'lx-music-desktop --ozone-platform=wayland'"  // 点击歌名打开播放器
+    },
+    "custom/power": {
+        "format" : " ⏻ ",
+		// "on-click":"wlogout --protocol layer-shell"
+        // "on-click":"hyprctl dispatch exec 'hyprlock'"
+        "on-click":"hyprctl dispatch exec '~/.config/waybar/scripts/power-menu'"
+    }
+}

@@ -1,0 +1,105 @@
+@import '/home/xzy/.cache/wal/waybar.css';
+
+* {
+    /* `otf-font-awesome` is required to be installed for icons */
+    /* font-family: FontAwesome, Roboto, Helvetica, Arial, sans-serif; */
+    /* font-family: FontAwesome, MesloLGS NF; */
+    /* font-family:"Font Awesome 6 Free";  */
+    font-family:"MesloLGS NF","WenQuanYi Micro Hei Mono";
+    font-size: 15px;
+    border: none;
+}
+
+
+window#waybar {
+    background-color: transparent;   /* 整个 bar 透明 */
+    transition-property: background-color;
+    transition-duration: 0.5s;
+}
+
+/* ========== 模块组（左/中/右）样式 ========== */
+.modules-left,
+.modules-center,
+.modules-right {
+    /* background-color: rgba(0, 0, 0, 0.6);  半透黑底，也可以使用 Pywal 变量调整 */
+    background-color: @background;
+    border-radius: 12px;                   /* 组外框圆角 */
+    margin: 4px 6px 4px 6px;              /* 上 右 下 左，四个参数 */
+    padding: 1px 0;                       /* 组内上下留一点空间，左右不额外padding */
+}
+
+.modules-right {
+    margin: 4px 0;               /* 上 右 下 左，四个参数 */
+}
+
+/* 可选：让每组之间有一点间距（通过外 margin 已经实现，无需额外） */
+
+/* ========== 组内通用模块样式 ========== */
+#workspaces,
+#clock,
+#battery,
+#cpu,
+#memory,
+#disk,
+#temperature,
+#backlight,
+#network,
+#bluetooth,
+#pulseaudio,
+#wireplumber,
+#tray,
+#mode,
+#custom-power,
+#window,
+#custom-icon {
+    /* 这些模块默认背景透明，让组背景透出，但保留自己的文字颜色 */
+    background-color: transparent;
+    color: @foreground;              /* 使用 Pywal 前景色 */
+    padding: 0 8px;
+    margin: 2px 0;                  /* 模块上下留一点间距，不左右margin */
+    border-radius: 0;               /* 不单独圆角，保持组圆角统一 */
+}
+
+#custom-icon{
+    color:#0069d4
+}
+/* 工作区按钮特殊处理 */
+#workspaces button {
+    background-color: transparent;
+    color: @foreground;
+    border-radius: 8px;
+    padding: 0 6px;
+    margin: 0;
+}
+
+#workspaces button.active {
+    background-color: @color2;       /* 强调色 */
+    color: @background;
+}
+
+#workspaces button:hover {
+    background-color: @color4;
+    color: @background;
+}
+
+/* 一些特殊模块可以单独改颜色（利用 Pywal 变量） */
+#network.disconnected {
+    color: @color1;
+}
+#bluetooth.connected {
+    color: @color6;
+}
+#pulseaudio.muted {
+    color: @color8;
+}
+#temperature.critical {
+    background-color: @color1;
+    color: @background;
+    border-radius: 8px;
+}
+
+
+/* 系统托盘 */
+#tray {
+    padding: 0 2px;
+}

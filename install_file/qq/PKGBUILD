@@ -1,0 +1,43 @@
+pkgname=qq
+_version=3.2.29
+_update_date=260528
+pkgver="${_version}_${_update_date}"
+pkgrel=1
+pkgdesc="linux for $pkgname"
+arch=('x86_64')  # 根据架构修改
+url="https://qqdl.gtimg.cn/qqfile/QQNT/9.9.31/release/00e6a3e7"
+license=('custom')
+filename="QQ_${pkgver}_x86_64_01.AppImage"
+source=("$url/$filename")  # 指向解压文件
+sha256sums=('SKIP')
+options=('!strip')  # 避免破坏 AppImage 自包含文件
+
+prepare(){
+  chmod +x "$filename"
+  ./$filename --appimage-extract
+  #xxx.AppImage --appimage-extract解压出来的文件夹权限为700,无法直接复制到系统
+  find "./squashfs-root" -type d -exec chmod 755 {} \;
+}
+
+package() {
+  # 复制整个解压目录到 /opt
+  install -d "$pkgdir/opt"
+  cp -r "$srcdir/squashfs-root" "$pkgdir/opt/$pkgname"
+
+  # 创建启动器脚本（在 /usr/bin 生成命令）
+  install -d "$pkgdir/usr/bin"
+  cat > "$pkgdir/usr/bin/$pkgname" <<EOF
+#!/bin/sh
+exec /opt/$pkgname/AppRun "\$@"
+EOF
+  chmod +x "$pkgdir/usr/bin/$pkgname"
+
+  # 可选：安装桌面文件（如果解压目录内有 .desktop 文件）
+  if [ -f "$srcdir/squashfs-root/$pkgname.desktop" ]; then
+    install -Dm644 "$srcdir/squashfs-root/$pkgname.desktop" \
+      "$pkgdir/usr/share/applications/$pkgname.desktop"
+    # 修改 [Desktop Entry] 下的 Exec与Icon路径
+    sed -i '/^\[Desktop Entry\]/,/^\[/ s|^Exec=.*|Exec=/opt/qq/AppRun|' "$pkgdir/usr/share/applications/$pkgname.desktop"
+    sed -i '/^\[Desktop Entry\]/,/^\[/ s|^Icon=.*|Icon=/opt/qq/qq.png|' "$pkgdir/usr/share/applications/$pkgname.desktop"
+  fi
+}

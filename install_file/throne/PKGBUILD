@@ -1,0 +1,75 @@
+# Maintainer: Mahdi Sarikhani <mahdisarikhani@outlook.com>
+# Maintainer: parhelia
+# Local modifications: install path, icon, local desktop, post-install toolchain cleanup
+
+pkgname=throne
+pkgver=1.1.6
+pkgrel=1
+pkgdesc="Cross-platform GUI proxy utility (Empowered by sing-box)"
+arch=('i686' 'pentium4' 'x86_64' 'armv7h' 'aarch64' 'loongarch64' 'riscv64')
+url="https://throneproj.github.io"
+license=('GPL-3.0-or-later')
+conflicts=(throne-bin throne-git throne-sysqt-bin)
+depends=('glibc' 'qt6-base')
+makedepends=('cmake' 'git' 'go' 'lld' 'protobuf' 'qt6-tools' 'vulkan-headers')
+options=('!debug')
+install=.install
+source=("${pkgname}-${pkgver}.tar.gz::https://github.com/throneproj/Throne/archive/${pkgver}.tar.gz"
+        "Throne.sh::https://aur.archlinux.org/cgit/aur.git/plain/Throne.sh?h=throne-bin"
+        "Throne.desktop::https://aur.archlinux.org/cgit/aur.git/plain/Throne.desktop?h=throne-bin"
+        "git+https://github.com/throneproj/routeprofiles.git#commit=71397056755ce9c20c817c1bfdea49dedfb8df80")
+sha256sums=('7c4a8fe1b2fc11b3197ecf70a63ff1a583b2ad9858ceedff7fddbbb2f9189efc'
+            'ba44fe899a7ae34474a497a797299587d1e286e7a574578804083220caefe1bb'
+            '1d7019ed30127fb3c7219016ed9e08bdc4809c65af13d2b02e59eed87a69082d'
+            'SKIP')
+
+prepare() {
+    mkdir -p build
+    cp routeprofiles/srslist.h build
+
+    cd "${pkgname^}-${pkgver}/core/server"
+    export GOBIN="${srcdir}/bin"
+    export PATH="${PATH}:${GOBIN}"
+    # 国内网络无法访问 proxy.golang.org，改用 goproxy.cn 镜像
+    export GOPROXY=https://goproxy.cn,direct
+    go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.11
+    go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.6.2
+
+    cd gen
+    protoc -I . --go_out=. --go-grpc_out=. libcore.proto
+}
+
+build() {
+    export INPUT_VERSION="${pkgver}"
+    cmake -B build -S "${pkgname^}-${pkgver}" \
+        -D CMAKE_BUILD_TYPE=Release \
+        -D CMAKE_INSTALL_PREFIX=/usr \
+        -W no-dev
+    cmake --build build
+
+    cd "${pkgname^}-${pkgver}/core/server"
+    export CGO_CPPFLAGS="${CPPFLAGS}"
+    export CGO_CFLAGS="${CFLAGS} -fno-lto"
+    export CGO_CXXFLAGS="${CXXFLAGS} -fno-lto"
+    export CGO_LDFLAGS="${LDFLAGS} -fuse-ld=lld -fno-lto"
+    # 国内网络无法访问 proxy.golang.org，改用 goproxy.cn 镜像
+    export GOPROXY=https://goproxy.cn,direct
+
+    VERSION_SINGBOX=$(go list -m -f '{{.Version}}' github.com/sagernet/sing-box)
+    go build -o "${srcdir}/build" \
+        -trimpath \
+        -buildmode=pie \
+        -mod=readonly \
+        -modcacherw \
+        -ldflags="-linkmode=external -w -s -X 'github.com/sagernet/sing-box/constant.Version=${VERSION_SINGBOX}' -X 'internal/godebug.defaultGODEBUG=multipathtcp=0' -checklinkname=0" \
+        -tags="with_clash_api,with_gvisor,with_quic,with_wireguard,with_utls,with_dhcp,with_tailscale,badlinkname,tfogo_checklinkname0,with_naive_outbound"
+}
+
+package() {
+    install -Dm755 build/Throne{,Core} -t "${pkgdir}/opt/Throne/"
+    install -Dm755 "Throne.sh" "${pkgdir}/usr/bin/throne"
+    install -Dm644 "Throne.desktop" "${pkgdir}/usr/share/applications/throne.desktop"
+
+    cd "${pkgname^}-${pkgver}"
+    install -Dm644 res/public/Throne.png "${pkgdir}/usr/share/icons/hicolor/512x512/apps/Throne.png"
+}

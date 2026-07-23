@@ -1,0 +1,16 @@
+# 缓存（pywal 等）
+.cache/
+
+# 编辑器/IDE 临时文件
+*.swp
+*.swo
+*.swn
+*~
+.*.un~
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
