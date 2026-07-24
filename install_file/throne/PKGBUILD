@@ -17,18 +17,21 @@ install=.install
 source=("${pkgname}-${pkgver}.tar.gz::https://github.com/throneproj/Throne/archive/${pkgver}.tar.gz"
         "Throne.sh::https://aur.archlinux.org/cgit/aur.git/plain/Throne.sh?h=throne-bin"
         "Throne.desktop::https://aur.archlinux.org/cgit/aur.git/plain/Throne.desktop?h=throne-bin"
-        "git+https://github.com/throneproj/routeprofiles.git#commit=71397056755ce9c20c817c1bfdea49dedfb8df80")
+        "srslist.h::https://raw.githubusercontent.com/throneproj/routeprofiles/ac7368592b3a1eeaaeb90da68d3a7f390e995760/srslist.h")
 sha256sums=('7c4a8fe1b2fc11b3197ecf70a63ff1a583b2ad9858ceedff7fddbbb2f9189efc'
             'ba44fe899a7ae34474a497a797299587d1e286e7a574578804083220caefe1bb'
             '1d7019ed30127fb3c7219016ed9e08bdc4809c65af13d2b02e59eed87a69082d'
-            'SKIP')
+            '62788e9f844627e5531e7c6a36cee428efd668f370f3f267fba638f93a619059')
 
 prepare() {
     mkdir -p build
-    cp routeprofiles/srslist.h build
+    cp "${srcdir}/srslist.h" build
 
     cd "${pkgname^}-${pkgver}/core/server"
     export GOBIN="${srcdir}/bin"
+    export GOPATH="${srcdir}/go"
+    export GOMODCACHE="${srcdir}/go/pkg/mod"
+    export GOFLAGS="-modcacherw"
     export PATH="${PATH}:${GOBIN}"
     # 国内网络无法访问 proxy.golang.org，改用 goproxy.cn 镜像
     export GOPROXY=https://goproxy.cn,direct
@@ -48,6 +51,9 @@ build() {
     cmake --build build
 
     cd "${pkgname^}-${pkgver}/core/server"
+    export GOPATH="${srcdir}/go"
+    export GOMODCACHE="${srcdir}/go/pkg/mod"
+    export GOFLAGS="-modcacherw"
     export CGO_CPPFLAGS="${CPPFLAGS}"
     export CGO_CFLAGS="${CFLAGS} -fno-lto"
     export CGO_CXXFLAGS="${CXXFLAGS} -fno-lto"
