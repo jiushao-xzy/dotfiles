@@ -24,4 +24,8 @@ bindkey '^[[C' forward-word
 alias ls="ls --color=auto"
 
 #fastfetch
-#fastfetch | lolcat
+fastfetch | lolcat
+
+
+export NVM_DIR="$HOME/.nvm"
+source /usr/share/nvm/init-nvm.sh

@@ -9,7 +9,7 @@
 --     position = "auto",
 --     scale    = "auto",
 -- })
-sunshine = true
+sunshine = false
 if sunshine then
 hl.monitor({ output = "DP-1", mode = "maxwidth", position = "auto", scale = "auto" })
 else
@@ -18,6 +18,9 @@ end
 hl.monitor({ output = "DP-2", mode = "preferred", position = "auto", scale = 1.5, mirror = "DP-1" })
 hl.monitor({ output = "HDMI-A-1", mode = "maxwidth", position = "auto", scale = 1.25, mirror = "DP-1" })
 hl.monitor({ output = "HDMI-A-2", mode = "maxwidth", position = "auto", scale = 1.25, mirror = "DP-1" })
+
+
+hl.monitor({ output = "DP-6", mode = "highrr", position = "auto", scale = 1.25})
 
 
 hl.workspace_rule({ workspace = "1", persistent = true })

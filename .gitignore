@@ -1,6 +1,3 @@
-# 缓存（pywal 等）
-.cache/
-
 # 编辑器/IDE 临时文件
 *.swp
 *.swo

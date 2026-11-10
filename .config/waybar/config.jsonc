@@ -8,7 +8,7 @@
     "height": 0, // Waybar height (to be removed for auto height)
     // "width": 1280, // Waybar width
     "spacing": 6, // Gaps between modules (4px)
-    "font-family":"MesloLGS NF",
+    "font-family": "MesloLGS NF, Noto Sans Symbols 2, Noto Color Emoji",
     // Choose the order of the modules
     "modules-left": [
         "custom/icon",
@@ -17,7 +17,7 @@
     ],
     "modules-center": [
         "clock"
-        
+
     ],
     "modules-right": [
         // "wireplumber",
@@ -29,7 +29,7 @@
         "memory",
         "temperature",
         // "hyprland/language",
-        
+
         "tray" ,
         "custom/power"
     ],
@@ -90,10 +90,10 @@
     "network": {
         "format-wifi": "",
         "format-ethernet": "",
-        "format-disconnected": "", 
+        "format-disconnected": "",
         "tooltip-format": "{essid} {frequency}GHz",
         // "on-click": "hyprctl dispatch exec 'nm-connection-editor'"
-        
+
     },
     "bluetooth":{
         "format": "",
@@ -127,7 +127,7 @@
         "format": " {volume}%",
         "format-muted": "",
 
-        "node-type": "Audio/Source", 
+        "node-type": "Audio/Source",
         "scroll-step": 5,
         "on-click": "qpwgraph",             // 左键点击打开qpwgraph  (PipeWire 图形化路由工具)
         "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"

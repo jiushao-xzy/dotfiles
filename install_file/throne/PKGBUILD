@@ -1,9 +1,11 @@
 # Maintainer: Mahdi Sarikhani <mahdisarikhani@outlook.com>
 # Maintainer: parhelia
-# Local modifications: install path, icon, local desktop, post-install toolchain cleanup
+# Local modifications: install path (/opt/Throne), pinned launcher/desktop,
+# codeload sources (github.com download is unstable here), goproxy.cn mirror,
+# post-install toolchain cleanup
 
 pkgname=throne
-pkgver=1.1.6
+pkgver=1.4.1
 pkgrel=1
 pkgdesc="Cross-platform GUI proxy utility (Empowered by sing-box)"
 arch=('i686' 'pentium4' 'x86_64' 'armv7h' 'aarch64' 'loongarch64' 'riscv64')
@@ -14,20 +16,20 @@ depends=('glibc' 'qt6-base')
 makedepends=('cmake' 'git' 'go' 'lld' 'protobuf' 'qt6-tools' 'vulkan-headers')
 options=('!debug')
 install=.install
-source=("${pkgname}-${pkgver}.tar.gz::https://github.com/throneproj/Throne/archive/${pkgver}.tar.gz"
-        "Throne.sh::https://aur.archlinux.org/cgit/aur.git/plain/Throne.sh?h=throne-bin"
-        "Throne.desktop::https://aur.archlinux.org/cgit/aur.git/plain/Throne.desktop?h=throne-bin"
-        "srslist.h::https://raw.githubusercontent.com/throneproj/routeprofiles/ac7368592b3a1eeaaeb90da68d3a7f390e995760/srslist.h")
-sha256sums=('7c4a8fe1b2fc11b3197ecf70a63ff1a583b2ad9858ceedff7fddbbb2f9189efc'
-            'ba44fe899a7ae34474a497a797299587d1e286e7a574578804083220caefe1bb'
+source=("${pkgname}-${pkgver}.tar.gz::https://codeload.github.com/throneproj/Throne/tar.gz/refs/tags/${pkgver}"
+        "Throne.sh::https://aur.archlinux.org/cgit/aur.git/plain/Throne.sh?h=throne-bin&id=518814d9655dc61c5f44842cdf85df1247856c99"
+        "Throne.desktop::https://aur.archlinux.org/cgit/aur.git/plain/Throne.desktop?h=throne-bin&id=4f3bfd95ae53fafc39bf26718e23f4eab5e426f3"
+        "routeprofiles.tar.gz::https://codeload.github.com/throneproj/routeprofiles/tar.gz/d74984c7b2a72211f347fa133e73c3b419e0e2fc")
+sha256sums=('e202bf3d5d5f370680d6704a3710afa4d80d805a2e1193e49ada3d3883e82841'
+            '91adcc748f6e80b4030baeb1f4a5a5271f503cdf2cbea22733dfb297cd171f61'
             '1d7019ed30127fb3c7219016ed9e08bdc4809c65af13d2b02e59eed87a69082d'
-            '62788e9f844627e5531e7c6a36cee428efd668f370f3f267fba638f93a619059')
+            '71a9fa3edc42c26187c60082714b667d183c8e1c1261587660f9757c26b35701')
 
 prepare() {
     mkdir -p build
-    cp "${srcdir}/srslist.h" build
+    cp "${srcdir}/routeprofiles-d74984c7b2a72211f347fa133e73c3b419e0e2fc/srslist.h" build
 
-    cd "${pkgname^}-${pkgver}/core/server"
+    cd "${pkgname^}-${pkgver}/core"
     export GOBIN="${srcdir}/bin"
     export GOPATH="${srcdir}/go"
     export GOMODCACHE="${srcdir}/go/pkg/mod"
@@ -35,7 +37,7 @@ prepare() {
     export PATH="${PATH}:${GOBIN}"
     # 国内网络无法访问 proxy.golang.org，改用 goproxy.cn 镜像
     export GOPROXY=https://goproxy.cn,direct
-    go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.11
+    go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.12
     go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.6.2
 
     cd gen
@@ -50,7 +52,7 @@ build() {
         -W no-dev
     cmake --build build
 
-    cd "${pkgname^}-${pkgver}/core/server"
+    cd "${pkgname^}-${pkgver}/core"
     export GOPATH="${srcdir}/go"
     export GOMODCACHE="${srcdir}/go/pkg/mod"
     export GOFLAGS="-modcacherw"
@@ -68,7 +70,7 @@ build() {
         -mod=readonly \
         -modcacherw \
         -ldflags="-linkmode=external -w -s -X 'github.com/sagernet/sing-box/constant.Version=${VERSION_SINGBOX}' -X 'internal/godebug.defaultGODEBUG=multipathtcp=0' -checklinkname=0" \
-        -tags="with_clash_api,with_gvisor,with_quic,with_wireguard,with_utls,with_dhcp,with_tailscale,badlinkname,tfogo_checklinkname0,with_naive_outbound"
+        -tags="with_clash_api,with_quic,with_wireguard,with_utls,with_dhcp,with_tailscale,with_openvpn,with_openconnect,badlinkname,tfogo_checklinkname0,with_naive_outbound"
 }
 
 package() {

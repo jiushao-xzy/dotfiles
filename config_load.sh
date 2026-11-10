@@ -23,6 +23,7 @@ SUBDIR="${1:-}"
 
 # === 白名单（相对仓库根的路径）===
 LINK_PATHS=(
+    ".cache"
     ".config"
     ".local"
     ".zsh"

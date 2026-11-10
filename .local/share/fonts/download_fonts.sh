@@ -14,3 +14,8 @@ mkdir Sarasa
 mv Sarasa-SuperTTC.ttc Sarasa
 rm Sarasa-SuperTTC-1.0.40.7z
 
+ # Noto Color Emoji（补 emoji 字形，如 dsh-tui 终端标题里的 🐋）
+wget -O noto-emoji.pkg.tar.zst https://mirrors.tuna.tsinghua.edu.cn/archlinux/extra/os/x86_64/noto-fonts-emoji-1%3A20260924-1-any.pkg.tar.zst
+tar --zstd -xf noto-emoji.pkg.tar.zst usr/share/fonts/noto/NotoColorEmoji.ttf
+mv usr/share/fonts/noto/NotoColorEmoji.ttf .
+rm -rf usr noto-emoji.pkg.tar.zst
