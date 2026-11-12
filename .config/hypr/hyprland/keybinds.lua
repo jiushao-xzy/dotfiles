@@ -10,6 +10,8 @@ local terminal    = "alacritty"
 local fileManager = "thunar"
 local menu        = "wofi --show drun --allow-images --normal-window --width 400"
 
+local editor      = "sh -c 'command -v code >/dev/null 2>&1 && exec code || command -v zeditor >/dev/null 2>&1 && exec zeditor || exec " .. terminal .. " -e vim'"
+
 -- exit
 -- bind = mainMod+Shift, e, exec, uwsm stop
 hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd("uwsm stop"))
@@ -126,7 +128,7 @@ hl.bind(mainMod .. " + T",      hl.dsp.exec_cmd("uwsm app -- " .. terminal))
 hl.bind(mainMod .. " + B",      hl.dsp.exec_cmd("uwsm app -- firefox"))
 hl.bind(mainMod .. " + E",      hl.dsp.exec_cmd("uwsm app -- " .. fileManager))
 hl.bind(mainMod .. " + D",      hl.dsp.exec_cmd("uwsm app -- " .. menu))
-hl.bind(mainMod .. " + C",      hl.dsp.exec_cmd("uwsm app -- code"))
+hl.bind(mainMod .. " + C",      hl.dsp.exec_cmd("uwsm app -- " .. editor))
 hl.bind(mainMod .. " + M",      hl.dsp.exec_cmd("uwsm app -- lx-music-desktop"))
 hl.bind(mainMod .. " + Z",      hl.dsp.exec_cmd("uwsm app -- zotero"))
 
