@@ -1,1 +1,3 @@
+lx-music-desktop-local
 python-pywal16
+throne-local

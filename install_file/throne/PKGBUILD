@@ -2,21 +2,23 @@
 # Maintainer: parhelia
 # Local modifications: install path (/opt/Throne), pinned launcher/desktop,
 # codeload sources (github.com download is unstable here), goproxy.cn mirror,
-# post-install toolchain cleanup
+# post-install toolchain cleanup.
+# pkgname 改 throne-local：与 archlinuxcn 仓库的 throne 不同名，
+# 避免 pacman -Syu 自动用仓库版覆盖本地 /opt 定制（源码目录名等仍用字面量 Throne）。
 
-pkgname=throne
+pkgname=throne-local
 pkgver=1.4.1
 pkgrel=1
 pkgdesc="Cross-platform GUI proxy utility (Empowered by sing-box)"
 arch=('i686' 'pentium4' 'x86_64' 'armv7h' 'aarch64' 'loongarch64' 'riscv64')
 url="https://throneproj.github.io"
 license=('GPL-3.0-or-later')
-conflicts=(throne-bin throne-git throne-sysqt-bin)
+conflicts=(throne throne-bin throne-git throne-sysqt-bin)
 depends=('glibc' 'qt6-base')
 makedepends=('cmake' 'git' 'go' 'lld' 'protobuf' 'qt6-tools' 'vulkan-headers')
 options=('!debug')
 install=.install
-source=("${pkgname}-${pkgver}.tar.gz::https://codeload.github.com/throneproj/Throne/tar.gz/refs/tags/${pkgver}"
+source=("throne-${pkgver}.tar.gz::https://codeload.github.com/throneproj/Throne/tar.gz/refs/tags/${pkgver}"
         "Throne.sh::https://aur.archlinux.org/cgit/aur.git/plain/Throne.sh?h=throne-bin&id=518814d9655dc61c5f44842cdf85df1247856c99"
         "Throne.desktop::https://aur.archlinux.org/cgit/aur.git/plain/Throne.desktop?h=throne-bin&id=4f3bfd95ae53fafc39bf26718e23f4eab5e426f3"
         "routeprofiles.tar.gz::https://codeload.github.com/throneproj/routeprofiles/tar.gz/d74984c7b2a72211f347fa133e73c3b419e0e2fc")
@@ -29,7 +31,7 @@ prepare() {
     mkdir -p build
     cp "${srcdir}/routeprofiles-d74984c7b2a72211f347fa133e73c3b419e0e2fc/srslist.h" build
 
-    cd "${pkgname^}-${pkgver}/core"
+    cd "Throne-${pkgver}/core"
     export GOBIN="${srcdir}/bin"
     export GOPATH="${srcdir}/go"
     export GOMODCACHE="${srcdir}/go/pkg/mod"
@@ -37,6 +39,15 @@ prepare() {
     export PATH="${PATH}:${GOBIN}"
     # 国内网络无法访问 proxy.golang.org，改用 goproxy.cn 镜像
     export GOPROXY=https://goproxy.cn,direct
+    # Go ≥1.27.4 的 cgo 拒绝 #cgo LDFLAGS 里的 -l: 冒号写法；cronet-go 的 linux_amd64
+    # 嵌套模块还在用它，复制出来改写为 ${SRCDIR}/libcronet.a 并用本地 replace 接管。
+    # 上游日后修复时 sed 不再命中，此 patch 自然退化为无操作。
+    go mod download github.com/sagernet/cronet-go/lib/linux_amd64
+    CRONET_DIR=$(go list -m -f '{{.Dir}}' github.com/sagernet/cronet-go/lib/linux_amd64)
+    cp -a "${CRONET_DIR}" "${srcdir}/cronet-patched"
+    chmod -R u+w "${srcdir}/cronet-patched"
+    sed -i 's#-l:libcronet\.a#${SRCDIR}/libcronet.a#' "${srcdir}/cronet-patched/libcronet_cgo.go"
+    go mod edit -replace github.com/sagernet/cronet-go/lib/linux_amd64="${srcdir}/cronet-patched"
     go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.12
     go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.6.2
 
@@ -46,13 +57,13 @@ prepare() {
 
 build() {
     export INPUT_VERSION="${pkgver}"
-    cmake -B build -S "${pkgname^}-${pkgver}" \
+    cmake -B build -S "Throne-${pkgver}" \
         -D CMAKE_BUILD_TYPE=Release \
         -D CMAKE_INSTALL_PREFIX=/usr \
         -W no-dev
     cmake --build build
 
-    cd "${pkgname^}-${pkgver}/core"
+    cd "Throne-${pkgver}/core"
     export GOPATH="${srcdir}/go"
     export GOMODCACHE="${srcdir}/go/pkg/mod"
     export GOFLAGS="-modcacherw"
@@ -78,6 +89,6 @@ package() {
     install -Dm755 "Throne.sh" "${pkgdir}/usr/bin/throne"
     install -Dm644 "Throne.desktop" "${pkgdir}/usr/share/applications/throne.desktop"
 
-    cd "${pkgname^}-${pkgver}"
+    cd "Throne-${pkgver}"
     install -Dm644 res/public/Throne.png "${pkgdir}/usr/share/icons/hicolor/512x512/apps/Throne.png"
 }

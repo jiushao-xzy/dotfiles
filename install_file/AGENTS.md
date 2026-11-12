@@ -34,6 +34,8 @@ namcap <pkg>-<ver>-*.pkg.tar.zst   # 检查构建产物
 | `baidunetdisk/` | deb 重打包 | 解 `data.tar.xz`，应用 desktop 文件补丁，注入中文 Name，移动 `/opt` 到 `/usr/lib` |
 | `zotero/` | tarball 重打包 | 解压到 `/opt/zotero`，`/usr/bin/zotero` 为符号链接，安装多尺寸图标 |
 | `wechat/`、`qq/` | AppImage 重打包 | `prepare()` 用 `--appimage-extract` 解压；**注意**解压出的 `squashfs-root` 目录权限为 700，必须 `find ... -exec chmod 755` 后才能复制到系统；`package()` 生成 `/usr/bin/<pkg>` wrapper 调用 `/opt/<pkg>/AppRun` |
+| `lx-music-desktop-local/` | 官方 .pacman 重打包 | 直接解官方 `lx-music-desktop_*_x64.pacman`（原生 /opt 布局，Electron 运行时自带，无系统 electron 依赖）；**包名故意加 `-local` 后缀**：与 archlinuxcn 仓库的 `lx-music-desktop`、AUR 的 `lx-music-desktop-bin` 都不同名，防止 `pacman -Syu`/paru 自动升级覆盖本地定制；`options=('!strip')`；`.install` 按内核 user namespaces 支持情况设置 chrome-sandbox 权限；源经 gh-proxy.com 中转（GitHub release 资产直连不通）；解包用 `tar --no-same-owner`（无特权环境 chown 会失败） |
+| `throne/` | 源码编译 (Qt6 + Go) | 本地改动：/opt 布局 + `.install` 里 SUID ThroneCore + goproxy.cn 镜像 + codeload 固定提交源；构建依赖 Go ≥1.26、Qt ≥6.9；**包名已改 `throne-local`**（与 archlinuxcn 的 `throne` 不同名，`conflicts=(throne ...)`），源码目录名在 PKGBUILD 里用字面量 `Throne-${pkgver}`，勿改回 `${pkgname^}` |
 
 ## 编辑约定
 

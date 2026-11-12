@@ -1,0 +1,17 @@
+post_install() {
+  _sandbox_perm
+}
+
+post_upgrade() {
+  _sandbox_perm
+}
+
+_sandbox_perm() {
+  # 与上游逻辑一致：内核支持非特权 user namespaces 时 chrome-sandbox 无需 SUID，
+  # 不支持时才设 SUID（Arch 默认内核开启 user namespaces，走 0755 分支）
+  if [[ -L /proc/self/ns/user ]] && unshare --user true 2>/dev/null; then
+    chmod 0755 /opt/lx-music-desktop/chrome-sandbox
+  else
+    chmod 4755 /opt/lx-music-desktop/chrome-sandbox
+  fi
+}

@@ -1,0 +1,35 @@
+# Maintainer: local
+# 本地重打包官方 lx-music-desktop .pacman（原生 /opt 布局，Electron 运行时自带）
+# 包名加 -local 后缀：与 archlinuxcn 仓库的 lx-music-desktop、AUR 的 lx-music-desktop-bin
+# 都不同名，pacman -Syu / paru 升级不会覆盖本地的源与安装脚本定制
+
+pkgname=lx-music-desktop-local
+pkgver=2.12.6
+pkgrel=2
+pkgdesc="Local repackage of lx-music-desktop (Electron music software, official /opt layout)"
+arch=('x86_64')
+url="https://github.com/lyswhut/lx-music-desktop"
+license=('Apache-2.0')
+conflicts=('lx-music-desktop' 'lx-music-desktop-bin')
+# 官方 .pacman 的依赖是 fpm 从 Debian 模板生成的；其中 http-parser 与 libappindicator-gtk3
+# 在 Arch 仓库中不存在，且 ldd 实测主程序对两者零引用（Electron 自带解析器/DBus 托盘），已剔除
+depends=('c-ares' 'ffmpeg' 'gtk3' 'libevent' 'libvpx' 'libxslt' 'libxss'
+         'minizip' 'nss' 're2' 'snappy' 'libnotify')
+options=('!strip')
+install=lx-music-desktop-local.install
+# GitHub release 直连（release-assets.githubusercontent.com）在本网络连不上，经 gh-proxy.com 中转
+source=("lx-music-desktop_${pkgver}_x64.pacman::https://gh-proxy.com/https://github.com/lyswhut/lx-music-desktop/releases/download/v${pkgver}/lx-music-desktop_${pkgver}_x64.pacman")
+sha256sums=('7def7990a7e3d5634cb0015508be60534733afa87cc8566cd6bd53ac5622ef13')
+
+package() {
+    # 官方 .pacman 本身就是 /opt 布局（主程序 + 自带 Electron 运行时 + usr/share 资源），原样搬即可；
+    # --no-same-owner：解包时不做 chown（沙箱/无特权环境会 EINVAL），最终包属主由 makepkg 压缩阶段统一为 root
+    tar --zstd -xf "${srcdir}/lx-music-desktop_${pkgver}_x64.pacman" --no-same-owner -C "${pkgdir}" opt usr
+
+    # 上游包不带 /usr/bin 链接（其 .INSTALL 在安装时建），这里直接打包进去
+    install -d "${pkgdir}/usr/bin"
+    ln -s /opt/lx-music-desktop/lx-music-desktop "${pkgdir}/usr/bin/lx-music-desktop"
+
+    # 沙箱二进制保持 0755；内核不支持非特权 user namespaces 时由 .install 兜底加 SUID
+    chmod 0755 "${pkgdir}/opt/lx-music-desktop/chrome-sandbox"
+}
