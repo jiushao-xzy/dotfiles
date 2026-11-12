@@ -1,0 +1,10 @@
+[Default Applications]
+x-scheme-handler/lxmusic=lx-music-desktop.desktop
+image/png=imv-dir.desktop
+image/jpeg=imv-dir.desktop
+image/gif=imv-dir.desktop
+image/webp=imv-dir.desktop
+image/avif=imv-dir.desktop
+image/bmp=imv-dir.desktop
+
+[Added Associations]
