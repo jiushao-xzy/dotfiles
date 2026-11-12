@@ -36,6 +36,7 @@ namcap <pkg>-<ver>-*.pkg.tar.zst   # 检查构建产物
 | `wechat/`、`qq/` | AppImage 重打包 | `prepare()` 用 `--appimage-extract` 解压；**注意**解压出的 `squashfs-root` 目录权限为 700，必须 `find ... -exec chmod 755` 后才能复制到系统；`package()` 生成 `/usr/bin/<pkg>` wrapper 调用 `/opt/<pkg>/AppRun` |
 | `lx-music-desktop-local/` | 官方 .pacman 重打包 | 直接解官方 `lx-music-desktop_*_x64.pacman`（原生 /opt 布局，Electron 运行时自带，无系统 electron 依赖）；**包名故意加 `-local` 后缀**：与 archlinuxcn 仓库的 `lx-music-desktop`、AUR 的 `lx-music-desktop-bin` 都不同名，防止 `pacman -Syu`/paru 自动升级覆盖本地定制；`options=('!strip')`；`.install` 按内核 user namespaces 支持情况设置 chrome-sandbox 权限；源经 gh-proxy.com 中转（GitHub release 资产直连不通）；解包用 `tar --no-same-owner`（无特权环境 chown 会失败） |
 | `throne/` | 源码编译 (Qt6 + Go) | 本地改动：/opt 布局 + `.install` 里 SUID ThroneCore + goproxy.cn 镜像 + codeload 固定提交源；构建依赖 Go ≥1.26、Qt ≥6.9；**包名已改 `throne-local`**（与 archlinuxcn 的 `throne` 不同名，`conflicts=(throne ...)`），源码目录名在 PKGBUILD 里用字面量 `Throne-${pkgver}`，勿改回 `${pkgname^}` |
+| `wps-office-cn-local/` | 官方 deb 重打包（/opt） | 基于 AUR wps-office-cn：保留 deb 原生 `/opt/kingsoft` 布局（不 sed 到 /usr/lib）；**用 GNU tar 解 data.tar.xz**（bsdtar 会按 UTF-8 转换、丢掉 GBK 文件名的 zh_CN 字体）；删自带 libstdc++（icu≥71.1 崩溃）与 libjpeg（段错误）；`sdl2` 依赖改为 `sdl2-compat`（sdl2 已退出仓库）；`ttf-wps-fonts`（AUR）与 `noto-fonts-cjk` 为硬依赖；源是 wpscdn 带时效签名 URL（签名算法内置于 PKGBUILD，升级需重算 sha256） |
 
 ## 编辑约定
 

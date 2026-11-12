@@ -1,0 +1,85 @@
+# Maintainer: local
+# 基于 AUR wps-office-cn 改写（12.1.2.29183），本地化调整：
+#   - pkgname 加 -local 后缀：AUR 的 wps-office-cn 更新时 paru 不会覆盖本地包
+#   - 保留官方 deb 原生 /opt 布局（AUR 会把 office6 sed 改到 /usr/lib，此处不动）
+#   - 不拆包：zh_CN 界面（mui）与 mime 注册一并收入主包
+#   - 字体 ttf-wps-fonts 写为硬依赖
+#   - 关键修复（删自带 libstdc++/libjpeg）在 package() 内完成
+
+pkgname=wps-office-cn-local
+pkgver=12.1.2.29183
+pkgrel=2
+pkgdesc="Kingsoft Office (WPS Office) CN version - local repackage, official /opt layout"
+arch=('x86_64')
+url="https://linux.wps.cn"
+license=('LicenseRef-WPS-EULA')
+options=('!emptydirs' '!debug')
+conflicts=('wps-office' 'wps-office-cn' 'kingsoft-office')
+provides=('wps-office' 'wps-office-cn')
+
+# 官方 wpscdn 下载链接带时效签名（算法取自 AUR wps-office-cn）
+_get_source_url() {
+    local furl="https://wps-linux-personal.wpscdn.cn/wps/download/ep/Linux2023/${pkgver##*.}/wps-office_${pkgver}.AK.preread.sw.Personal_806791_$1.deb"
+    local uri="${furl#https://wps-linux-personal.wpscdn.cn}"
+    local secrityKey='7f8faaaa468174dc1c9cd62e5f218a5b'
+    local timestamp10=$(date '+%s')
+    local md5hash=$(echo -n "${secrityKey}${uri}${timestamp10}" | md5sum)
+    echo "${furl}?t=${timestamp10}&k=${md5hash%% *}"
+}
+source_x86_64=("wps-office_${pkgver}_amd64.deb::$(_get_source_url amd64)")
+sha256sums_x86_64=('77ffbdc1be76c834e1853c27ff9063e49d5d3b1f30b206d785761b5bf560c83b')
+
+# 注意：ttf-wps-fonts 为 AUR 包（公式符号字体，必需），安装前先 paru 装好
+depends=('fontconfig' 'xorg-mkfontscale' 'libxrender' 'desktop-file-utils' 'shared-mime-info'
+         'xdg-utils' 'glu' 'sdl2-compat' 'libpulse' 'hicolor-icon-theme' 'libxss' 'sqlite' 'libtool'
+         'libxslt' 'libjpeg-turbo' 'ttf-wps-fonts' 'noto-fonts-cjk'
+         'cups' 'pango' 'curl' 'libtiff5')
+optdepends=('ttf-ms-fonts: Microsoft fonts recommended for document fidelity (AUR)')
+
+prepare() {
+    # makepkg 已把 .deb（ar 包）解开，data.tar.xz 落在 srcdir（与 AUR 相同前提）。
+    # 用 GNU tar 解：不做字符集转换。deb 内 zh_CN 字体文件名是 GBK 字节，
+    # bsdtar 按 UTF-8 转换会直接跳过这些文件（丢字体），GNU tar 原样保留字节，
+    # 与官方在任何发行版上的安装结果一致。
+    tar -xJf data.tar.xz
+    # 注意：与 AUR 不同——不 sed 改 /usr/bin 脚本，保留其对 /opt/kingsoft/wps-office 的引用
+}
+
+package() {
+    # 主程序 → /opt/kingsoft/wps-office（官方原生布局）
+    install -d "${pkgdir}/opt/kingsoft/wps-office"
+    cp -r "${srcdir}/opt/kingsoft/wps-office/office6" "${pkgdir}/opt/kingsoft/wps-office/"
+
+    # 关键修复 1：icu>=71.1 下崩溃 → 删自带 libstdc++（用系统库）
+    rm "${pkgdir}"/opt/kingsoft/wps-office/office6/libstdc++.so*
+    # 关键修复 2：自带 libjpeg 在新系统上会段错误 → 用系统库
+    rm "${pkgdir}"/opt/kingsoft/wps-office/office6/libjpeg.so*
+
+    # 许可文件
+    install -Dm644 -t "${pkgdir}/usr/share/licenses/${pkgname}" \
+        "${srcdir}/opt/kingsoft/wps-office/office6/mui/default/"*.html
+
+    # /usr/bin 启动脚本（deb 自带，内部引用 /opt 路径，无需改动）
+    install -d "${pkgdir}/usr/bin"
+    install -m755 "${srcdir}"/usr/bin/* "${pkgdir}/usr/bin"
+
+    # 桌面文件 / 图标 / 目录菜单 / 自带字体 / mime 注册
+    cd "${srcdir}/usr/share"
+    install -d "${pkgdir}/usr/share/applications"
+    cp -r applications/* "${pkgdir}/usr/share/applications"
+    install -d "${pkgdir}/usr/share/desktop-directories"
+    cp -r desktop-directories/* "${pkgdir}/usr/share/desktop-directories"
+    install -d "${pkgdir}/usr/share/icons"
+    cp -r icons/* "${pkgdir}/usr/share/icons"
+    install -d "${pkgdir}/usr/share/fonts/wps-office"
+    cp -r fonts/wps-office/* "${pkgdir}/usr/share/fonts/wps-office"
+    install -d "${pkgdir}/usr/share/mime"
+    cp -r mime/* "${pkgdir}/usr/share/mime"
+
+    # 应用菜单聚合文件
+    install -Dm644 -t "${pkgdir}/etc/xdg/menus/applications-merged" \
+        "${srcdir}/etc/xdg/menus/applications-merged/wps-office.menu"
+
+    # 字体/桌面/mime 数据库刷新由 pacman 钩子自动完成
+    #（fontconfig、shared-mime-info、desktop-file-utils 均自带 hook）
+}
