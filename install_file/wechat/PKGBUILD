@@ -1,41 +1,57 @@
-pkgname=wechat
-pkgver=4.1.1  # 替换为实际版本
-pkgrel=1
-pkgdesc="linux for $pkgname"
-arch=('x86_64')  # 根据架构修改
-url="https://dldir1v6.qq.com/weixin/Universal/Linux/"
-license=('custom')
-filename="WeChatLinux_x86_64.AppImage"
-source=("$url/$filename")  # 指向解压文件
-sha256sums=('SKIP')
-options=('!strip')  # 避免破坏 AppImage 自包含文件
+# 本地重打包官方微信 Linux AppImage
+# - pkgname 加 -local 后缀：与 AUR 的 wechat / wechat-bin 不同名，paru 升级不会覆盖本地定制
+# - 安装路径保持 /opt/wechat、启动命令 /usr/bin/wechat（一律用 _appname，勿改回 ${pkgname}）
+# - 官方下载 URL 不带版本号（内容随官方更新漂移），升级时需重算 sha256sums 并同步 pkgver
+#   （版本取自解包后 wechat.desktop 的 X-AppImage-Version）
 
-prepare(){
-  chmod +x "$filename"
-  ./$filename --appimage-extract
-  #xxx.AppImage --appimage-extract解压出来的文件夹权限为700,无法直接复制到系统
-  find "./squashfs-root" -type d -exec chmod 755 {} \;
+pkgname=wechat-local
+_appname=wechat
+pkgver=4.1.13
+pkgrel=1
+pkgdesc="WeChat for Linux (official AppImage repackage, /opt layout)"
+arch=('x86_64')
+url="https://weixin.qq.com/"
+license=('custom')
+conflicts=('wechat' 'wechat-bin')
+options=('!strip')  # AppImage 自包含文件，剥离会破坏运行时
+depends=('nss' 'xcb-util-renderutil' 'xcb-util-keysyms' 'xcb-util-image' 'xcb-util-wm'
+         'libxkbcommon-x11' 'libxkbcommon' 'libxcb' 'nspr' 'libxcomposite' 'glib2'
+         'libxrender' 'libxext' 'alsa-lib' 'dbus' 'libxrandr' 'fontconfig' 'pango'
+         'freetype2' 'libxfixes' 'cairo' 'libx11' 'libvlc' 'libxdamage' 'libdrm'
+         'mesa' 'libglvnd' 'libpulse' 'hicolor-icon-theme')
+_filename=WeChatLinux_x86_64.AppImage
+source=("${_filename}::https://dldir1v6.qq.com/weixin/Universal/Linux/${_filename}")
+sha256sums=('65b152baeb60bad8d4f1b8e5abf800b1efd61e4294521d69405810168b3fc2c3')
+
+prepare() {
+    chmod +x "${_filename}"
+    ./"${_filename}" --appimage-extract
+    # AppImage 解压出的目录权限为 700，必须放开才能复制到系统
+    find squashfs-root -type d -exec chmod 755 {} \;
 }
 
 package() {
-  # 复制整个解压目录到 /opt
-  install -d "$pkgdir/opt"
-  cp -r "$srcdir/squashfs-root" "$pkgdir/opt/$pkgname"
+    install -d "${pkgdir}/opt"
+    cp -r "${srcdir}/squashfs-root" "${pkgdir}/opt/${_appname}"
 
-  # 创建启动器脚本（在 /usr/bin 生成命令）
-  install -d "$pkgdir/usr/bin"
-  cat > "$pkgdir/usr/bin/$pkgname" <<EOF
+    # /usr/bin 启动器：调用 /opt/wechat/AppRun
+    install -d "${pkgdir}/usr/bin"
+    cat > "${pkgdir}/usr/bin/${_appname}" <<EOF
 #!/bin/sh
-exec /opt/$pkgname/AppRun "\$@"
+exec /opt/${_appname}/AppRun "\$@"
 EOF
-  chmod +x "$pkgdir/usr/bin/$pkgname"
+    chmod +x "${pkgdir}/usr/bin/${_appname}"
 
-  # 可选：安装桌面文件（如果解压目录内有 .desktop 文件）
-  if [ -f "$srcdir/squashfs-root/$pkgname.desktop" ]; then
-    install -Dm644 "$srcdir/squashfs-root/$pkgname.desktop" \
-      "$pkgdir/usr/share/applications/$pkgname.desktop" 
-    # 修改 [Desktop Entry] 下的 Exec与Icon路径
-    sed -i '/^\[Desktop Entry\]/,/^\[/ s|^Exec=.*|Exec=/opt/wechat/AppRun|' "$pkgdir/usr/share/applications/$pkgname.desktop"
-    sed -i '/^\[Desktop Entry\]/,/^\[/ s|^Icon=.*|Icon=/opt/wechat/wechat.png|' "$pkgdir/usr/share/applications/$pkgname.desktop"
-  fi
+    # 官方自带 wechat.desktop（Exec=AppRun %U），改为绝对路径
+    install -Dm644 "${srcdir}/squashfs-root/${_appname}.desktop" \
+        "${pkgdir}/usr/share/applications/${_appname}.desktop"
+    sed -i '/^\[Desktop Entry\]/,/^\[/ s|^Exec=.*|Exec=/opt/wechat/AppRun %U|' \
+        "${pkgdir}/usr/share/applications/${_appname}.desktop"
+    sed -i '/^\[Desktop Entry\]/,/^\[/ s|^Icon=.*|Icon=/opt/wechat/wechat.png|' \
+        "${pkgdir}/usr/share/applications/${_appname}.desktop"
+
+    # license=custom 需随包附许可文件：官方 AppImage 无独立文件，附协议链接
+    install -d "${pkgdir}/usr/share/licenses/${pkgname}"
+    echo "https://www.wechat.com/zh_CN/service_terms.html" \
+        > "${pkgdir}/usr/share/licenses/${pkgname}/terms.txt"
 }
