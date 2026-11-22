@@ -7,7 +7,7 @@
 pkgname=wechat-local
 _appname=wechat
 pkgver=4.1.13
-pkgrel=2
+pkgrel=3
 pkgdesc="WeChat for Linux (official AppImage repackage, /opt layout)"
 arch=('x86_64')
 url="https://weixin.qq.com/"

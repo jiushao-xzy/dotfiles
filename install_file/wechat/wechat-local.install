@@ -12,7 +12,8 @@ _setup_payload() {
   local manifest=/opt/wechat/wechat-payload.sha256
   local digest
 
-  [ -x "$installer" ] && [ -f "$payload" ] && [ -r "$manifest" ] || return 0
+  # 注意用 -f：官方 AppImage 里 install-apparmor.sh 权限是 644（官方以 bash 调用），无执行位
+  [ -f "$installer" ] && [ -f "$payload" ] && [ -r "$manifest" ] || return 0
   digest="$(cat "$manifest")" || return 0
 
   # 复用官方安装脚本（pacman 钩子本来就是 root，无需 pkexec）：
@@ -31,7 +32,7 @@ post_remove() {
   local manifest=/opt/wechat/wechat-payload.sha256
   local digest
 
-  [ -x "$installer" ] && [ -r "$manifest" ] || return 0
+  [ -f "$installer" ] && [ -r "$manifest" ] || return 0
   digest="$(cat "$manifest")" || return 0
   # 卸载时清理 /opt/wechat-appimage/app（官方卸载路径，含 AppArmor 规则移除）
   bash "$installer" --uninstall "$digest" 2>/dev/null || true
