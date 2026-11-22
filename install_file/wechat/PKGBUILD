@@ -7,13 +7,14 @@
 pkgname=wechat-local
 _appname=wechat
 pkgver=4.1.13
-pkgrel=1
+pkgrel=2
 pkgdesc="WeChat for Linux (official AppImage repackage, /opt layout)"
 arch=('x86_64')
 url="https://weixin.qq.com/"
 license=('custom')
 conflicts=('wechat' 'wechat-bin')
 options=('!strip')  # AppImage 自包含文件，剥离会破坏运行时
+install=wechat-local.install
 depends=('nss' 'xcb-util-renderutil' 'xcb-util-keysyms' 'xcb-util-image' 'xcb-util-wm'
          'libxkbcommon-x11' 'libxkbcommon' 'libxcb' 'nspr' 'libxcomposite' 'glib2'
          'libxrender' 'libxext' 'alsa-lib' 'dbus' 'libxrandr' 'fontconfig' 'pango'

@@ -1,0 +1,38 @@
+post_install() {
+  _setup_payload
+}
+
+post_upgrade() {
+  _setup_payload
+}
+
+_setup_payload() {
+  local installer=/opt/wechat/install-apparmor.sh
+  local payload=/opt/wechat/wechat-payload.tar
+  local manifest=/opt/wechat/wechat-payload.sha256
+  local digest
+
+  [ -x "$installer" ] && [ -f "$payload" ] && [ -r "$manifest" ] || return 0
+  digest="$(cat "$manifest")" || return 0
+
+  # 复用官方安装脚本（pacman 钩子本来就是 root，无需 pkexec）：
+  # 把 payload 解压到 /opt/wechat-appimage/app 并写安装标记，AppRun 检测到标记后
+  # 首次启动直接运行，不再弹 polkit 授权；AppArmor 部分在 Arch 上自动跳过。
+  # 失败时保留官方首启 pkexec 流程作为兜底。
+  if bash "$installer" --install "$payload" "$digest"; then
+    echo "WeChat payload 已预装到 /opt/wechat-appimage/app，首次启动无需授权。"
+  else
+    echo "警告：WeChat payload 预装失败，首次启动时将走官方 pkexec 流程。" >&2
+  fi
+}
+
+post_remove() {
+  local installer=/opt/wechat/install-apparmor.sh
+  local manifest=/opt/wechat/wechat-payload.sha256
+  local digest
+
+  [ -x "$installer" ] && [ -r "$manifest" ] || return 0
+  digest="$(cat "$manifest")" || return 0
+  # 卸载时清理 /opt/wechat-appimage/app（官方卸载路径，含 AppArmor 规则移除）
+  bash "$installer" --uninstall "$digest" 2>/dev/null || true
+}
