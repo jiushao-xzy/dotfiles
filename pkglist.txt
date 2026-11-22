@@ -29,6 +29,7 @@ hyprlock
 hyprpolkitagent
 hyprpwcenter
 hyprshot
+imv
 linux
 linux-firmware
 linux-headers

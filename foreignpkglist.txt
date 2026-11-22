@@ -1,3 +1,5 @@
 lx-music-desktop-local
 python-pywal16
 throne-local
+ttf-wps-fonts
+wps-office-cn-local
