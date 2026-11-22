@@ -10,7 +10,7 @@ local terminal    = "alacritty"
 local fileManager = "thunar"
 local menu        = "wofi --show drun --allow-images --normal-window --width 400"
 
-local editor      = "sh -c 'command -v code >/dev/null 2>&1 && exec code || command -v zeditor >/dev/null 2>&1 && exec zeditor || exec " .. terminal .. " -e vim'"
+local editor      = "sh -c 'command -v code >/dev/null 2>&1 && exec code || command -v zeditor >/dev/null 2>&1 && exec zeditor || command -v ranger >/dev/null 2>&1 && exec " .. terminal .. " -e ranger || exec " .. terminal .. " -e vim'"
 
 -- exit
 -- bind = mainMod+Shift, e, exec, uwsm stop
