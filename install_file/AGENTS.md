@@ -28,7 +28,7 @@ namcap <pkg>-<ver>-*.pkg.tar.zst   # 检查构建产物
 | 子目录 | 类型 | 关键点 |
 |--------|------|--------|
 | `dwm/` | 源码编译 (suckless) | 本地 fork：`src/config.h` 在 `prepare()` 中覆盖上游 config.h；`patches/dwm-autostart-*.diff` 是自定义补丁；产物含 xsessions desktop 文件 |
-| `waybar-local/` | 源码编译 (meson) | 应用本地补丁 `src/lua-ipc-trimmed.patch`；`-Dexperimental=true`、`-Dcava=disabled`；`backup()` 中声明了两个配置文件 |
+| `waybar-local/` | 源码编译 (meson) | 应用本地补丁 `lua-ipc-trimmed.patch`；`-Dexperimental=true`、`-Dcava=disabled`；`backup()` 中声明了两个配置文件；build() 用**标准 `meson setup`**（残留已配置目录时无害通过并自动再生成）；**不要**用不带 `setup` 的歧义 `meson` 形式（会误报 "Unknown option"），**也不要在 PKGBUILD 里写 `rm -rf` 之类防御性清理**——改了 meson 选项需要干净重建时用 `makepkg -C`。**源文件名沿用官方 `waybar-${pkgver}.tar.gz`**（不随本地 pkgname 改名），`conflicts=('waybar')` 与官方仓库包互斥 |
 | `claude-code/` | 二进制重打包 | 下载预编译的 Bun 单文件可执行；`package()` 写一个 `DISABLE_AUTOUPDATER=1` 的 wrapper；`options=('!strip')` 否则会破坏嵌入的 JS/resources |
 | `anylisten/` | 二进制重打包 | 直接下载上游 `.pacman` 包，`package()` 仅 `cp -r opt/ usr/` |
 | `baidunetdisk/` | deb 重打包 | 解 `data.tar.xz`，应用 desktop 文件补丁，注入中文 Name，移动 `/opt` 到 `/usr/lib` |

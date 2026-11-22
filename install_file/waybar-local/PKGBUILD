@@ -3,7 +3,7 @@
 # Contributor: Maxim Baz <archlinux at maximbaz dot com>
 # Contributor: Parmjot Singh <parmjotsinghrobot at gmail dot com>
 
-pkgname=waybar
+pkgname=waybar-local
 pkgver=0.15.0
 pkgrel=2.1
 epoch=1
@@ -12,6 +12,7 @@ arch=('x86_64')
 url="https://github.com/Alexays/Waybar/"
 license=('MIT')
 options=('!debug')
+conflicts=('waybar')
 depends=(
     'atkmm'
     'cairomm'
@@ -59,7 +60,7 @@ backup=(
 optdepends=(
     'otf-font-awesome: Icons in the default configuration'
 )
-source=("$pkgname-$pkgver.tar.gz::https://github.com/Alexays/Waybar/archive/$pkgver.tar.gz"
+source=("waybar-$pkgver.tar.gz::https://github.com/Alexays/Waybar/archive/$pkgver.tar.gz"
         "lua-ipc-trimmed.patch")
 b2sums=('3f0eb6cbf4ba189ddd37e82678ef87f877f6f48cf0bb699624c5d697c7164b11c3e25bf8fe382564c1e5891a6070d7c7e6d3009f8461a7087294dffccb78de95'
         '9e6183f441da0b97fbc76fead815074312f4ef912557254e132e1addd20f84b8f4a5aa8e4a654ca9eedfe08972abfe5b427e4e7edbeed5ab028edb062c16602a')
@@ -71,7 +72,7 @@ prepare() {
 
 build() {
     cd "Waybar-$pkgver"
-    meson --prefix=/usr \
+    meson setup --prefix=/usr \
           --buildtype=plain \
           --auto-features=enabled \
           --wrap-mode=nodownload \
